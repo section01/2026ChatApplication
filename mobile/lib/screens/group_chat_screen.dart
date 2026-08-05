@@ -15,6 +15,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     late List<Message> _messages;
 
+    final TextEditingController _controller = TextEditingController();
+
     @override
     void initState() {
         super.initState();
@@ -46,6 +48,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                             children: [
                                 Expanded(
                                     child: TextField(
+                                        controller: _controller,
+
                                         decoration: const InputDecoration(
                                         hintText: "メッセージを入力",
                                         border: OutlineInputBorder(),
