@@ -8,14 +8,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
 
-    public CorsConfig() {
-        System.out.println("★★★★★ CorsConfig constructor loaded ★★★★★");
-    }
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-
-        System.out.println("★★★★★ CorsConfig loaded ★★★★★");
 
         return new WebMvcConfigurer() {
 

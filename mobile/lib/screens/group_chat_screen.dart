@@ -32,7 +32,6 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
         // Health APIの呼び出し
         _healthService.getHealth().then((result) {
-            print("Health API: $result");
         });
     }
 
