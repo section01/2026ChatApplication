@@ -1,2 +1,9 @@
+com\example\chat_server\entity\User.class
+com\example\chat_server\service\UserService.class
+com\example\chat_server\controller\HealthController.class
+com\example\chat_server\repository\UserRepository.class
 com\example\chat_server\ChatServerApplication.class
+com\example\chat_server\config\CorsConfig.class
+com\example\chat_server\controller\UserController.class
 com\example\chat_server\controller\TestController.class
+com\example\chat_server\config\CorsConfig$1.class

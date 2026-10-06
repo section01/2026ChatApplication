@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
+import '../services/health_service.dart';
 import '../models/message.dart';
 import '../widgets/message_list.dart';
 
@@ -16,6 +17,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     late List<Message> _messages;
 
+    final HealthService _healthService = HealthService();
     final TextEditingController _controller = TextEditingController();
     final ScrollController _scrollController = ScrollController();
     final GlobalKey _lastMessageKey = GlobalKey();
@@ -25,7 +27,13 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     void initState() {
         super.initState();
 
+        // 初期メッセージ
         _messages = List.from(messages);
+
+        // Health APIの呼び出し
+        _healthService.getHealth().then((result) {
+            print("Health API: $result");
+        });
     }
 
     // 画面破棄時にコントローラーを破棄
