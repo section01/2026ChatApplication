@@ -60,6 +60,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     // 画面描画
     @override
+    void dispose() {
+        _controller.dispose();
+        super.dispose();
+    }
+
+    void _sendMessage() {
+
+    }
+
+    @override
     Widget build(BuildContext context) {
         return Scaffold(
             appBar: AppBar(
