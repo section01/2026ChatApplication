@@ -17,6 +17,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     final TextEditingController _controller = TextEditingController();
 
+    // 初期化処理
     @override
     void initState() {
         super.initState();
@@ -24,6 +25,40 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         _messages = List.from(messages);
     }
 
+    // 画面破棄時にコントローラーを破棄
+    @override
+    void dispose() {
+        _controller.dispose();
+        super.dispose();
+    }
+
+    // メッセージ送信処理
+    void _sendMessage() {
+        final text = _controller.text;
+
+        // 空白を除去して空文字の場合は送信しない
+        if (text.trim().isEmpty) {
+            return;
+        }
+
+        // 画面を更新
+        setState(() {
+            // メッセージを追加
+            _messages.add(
+                Message(
+                    senderName: "自分",
+                    text: text,
+                    createdAt: DateTime.now(),
+                    isMine: true,
+                ),
+            );
+        });
+
+        // 入力欄をクリア
+        _controller.clear();
+    }
+
+    // 画面描画
     @override
     Widget build(BuildContext context) {
         return Scaffold(
@@ -49,6 +84,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                                 Expanded(
                                     child: TextField(
                                         controller: _controller,
+                                        textInputAction: TextInputAction.send,
+
+                                        // Enterキーで送信
+                                        onSubmitted: (_) { 
+                                            _sendMessage();
+                                        },
 
                                         decoration: const InputDecoration(
                                         hintText: "メッセージを入力",
@@ -61,7 +102,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
                                 ElevatedButton(
                                     onPressed: () {
-                                        // Sprint1では未実装
+                                        // メッセージ送信処理
+                                        _sendMessage();
                                     },
                                     child: const Text("送信"),
                                 ),
