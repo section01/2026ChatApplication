@@ -1,5 +1,6 @@
 // 画面全体
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../models/message.dart';
 import '../widgets/message_list.dart';
@@ -16,6 +17,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     late List<Message> _messages;
 
     final TextEditingController _controller = TextEditingController();
+    final ScrollController _scrollController = ScrollController();
+    final GlobalKey _lastMessageKey = GlobalKey();
 
     // 初期化処理
     @override
@@ -28,7 +31,10 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     // 画面破棄時にコントローラーを破棄
     @override
     void dispose() {
+        // 入力欄のコントローラーを破棄
         _controller.dispose();
+        // スクロールのコントローラーを破棄
+        _scrollController.dispose();
         super.dispose();
     }
 
@@ -56,17 +62,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
         // 入力欄をクリア
         _controller.clear();
-    }
 
-    // 画面描画
-    @override
-    void dispose() {
-        _controller.dispose();
-        super.dispose();
-    }
+        // 一覧を一番下まで自動スクロール
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+            final context = _lastMessageKey.currentContext;
 
-    void _sendMessage() {
-
+            if (context != null) {
+                Scrollable.ensureVisible(
+                    context,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                );
+            }
+        });
     }
 
     @override
@@ -82,6 +90,8 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                     Expanded(
                         child: MessageList(
                             messages: _messages,
+                            controller: _scrollController,
+                            lastMessageKey: _lastMessageKey,
                         ),
                     ),
 
