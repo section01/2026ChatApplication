@@ -4,13 +4,16 @@ import 'package:http/http.dart' as http;
 // JSONを扱うためのパッケージ
 import 'dart:convert';
 
+// メッセージモデル
+import '../models/message.dart';
+
 // メッセージに関するAPI通信を担当するクラス
 class MessageService {
   // Spring BootのベースURL
   static const String baseUrl = "http://localhost:8080";
 
   // メッセージ一覧を取得するメソッド
-  Future<List<dynamic>> getMessages() async {
+  Future<List<Message>> getMessages() async {
     // Spring Bootのメッセージ取得APIを呼び出す
     final response = await http.get(Uri.parse("$baseUrl/api/messages"));
 
@@ -19,8 +22,13 @@ class MessageService {
       throw Exception("メッセージ取得に失敗しました");
     }
 
-    // JSON形式のレスポンスをDartで扱える形式に変換して返す
-    return jsonDecode(response.body);
+    // JSON形式のレスポンスをDartで扱える形式に変換
+    final List<dynamic> data = jsonDecode(response.body);
+
+    // JSONをMessageオブジェクトに変換して返す
+    return data.map((item) {
+      return Message.fromJson(item as Map<String, dynamic>);
+    }).toList();
   }
 
   // メッセージを送信するメソッド

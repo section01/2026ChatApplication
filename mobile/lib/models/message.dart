@@ -12,6 +12,16 @@ class Message {
     required this.createdAt,
     required this.isMine,
   });
+
+  // APIから受け取ったJSONをMessageに変換する
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      senderName: "自分",
+      text: json["text"],
+      createdAt: DateTime.now(),
+      isMine: true,
+    );
+  }
 }
 
 // ダミーデータ

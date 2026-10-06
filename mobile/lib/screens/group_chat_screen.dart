@@ -5,6 +5,7 @@ import 'package:flutter/scheduler.dart';
 import '../services/message_service.dart';
 import '../models/message.dart';
 import '../widgets/message_list.dart';
+import '../widgets/loading_indicator.dart';
 
 class GroupChatScreen extends StatefulWidget {
   const GroupChatScreen({super.key});
@@ -15,6 +16,12 @@ class GroupChatScreen extends StatefulWidget {
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
   late List<Message> _messages;
+
+  // APIからメッセージを取得中かどうか
+  bool _isLoading = true;
+
+  // API取得時に発生したエラーメッセージ
+  String? _errorMessage;
 
   final MessageService _messageService = MessageService();
   final TextEditingController _controller = TextEditingController();
@@ -30,18 +37,23 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     _messages = List.from(messages);
 
     // メッセージ一覧をAPIから取得
-    _messageService.getMessages().then((result) {
-      setState(() {
-        // APIから取得したメッセージを画面表示用の形式に変換
-        _messages = result.map((item) {
-          return Message(
-            senderName: "自分",
-            text: item["text"],
-            createdAt: DateTime.now(),
-            isMine: true,
-          );
-        }).toList();
-      });
+    _messageService.getMessages().then((result) async {
+
+        setState(() {
+            // APIから取得したMessageをそのまま画面に設定
+            _messages = result;
+
+            // APIからの取得が完了したので読み込み中を終了
+            _isLoading = false;
+        });
+    }).catchError((error) {
+        setState(() {
+            // API取得に失敗したことを記録
+            _errorMessage = "メッセージの取得に失敗しました";
+
+            // エラーが発生したので読み込み中を終了
+            _isLoading = false;
+        });
     });
   }
 
@@ -107,11 +119,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         children: [
           // メッセージ一覧
           Expanded(
-            child: MessageList(
-              messages: _messages,
-              controller: _scrollController,
-              lastMessageKey: _lastMessageKey,
-            ),
+            child: _isLoading
+                ? const Center(
+                    child: LoadingIndicator(),
+                )
+                : _errorMessage != null
+                    ? Center(
+                        child: Text(
+                            _errorMessage!,
+                        ),
+                    )
+                    : MessageList(
+                        messages: _messages,
+                        controller: _scrollController,
+                        lastMessageKey: _lastMessageKey,
+                      ),
           ),
 
           // 入力欄
