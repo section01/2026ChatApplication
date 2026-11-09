@@ -37,23 +37,33 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     _messages = List.from(messages);
 
     // メッセージ一覧をAPIから取得
-    _messageService.getMessages().then((result) async {
+    _loadMessages();
+  }
 
-        setState(() {
-            // APIから取得したMessageをそのまま画面に設定
-            _messages = result;
+  // APIからメッセージ一覧を取得する処理
+  void _loadMessages() {
 
-            // APIからの取得が完了したので読み込み中を終了
-            _isLoading = false;
-        });
+    // 読み込み中の状態にする
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    // メッセージ一覧をAPIから取得
+    _messageService.getMessages().then((result) {
+
+      setState(() {
+        _messages = result;
+        _isLoading = false;
+      });
+
     }).catchError((error) {
-        setState(() {
-            // API取得に失敗したことを記録
-            _errorMessage = "メッセージの取得に失敗しました";
 
-            // エラーが発生したので読み込み中を終了
-            _isLoading = false;
-        });
+      setState(() {
+        _errorMessage = "メッセージの取得に失敗しました";
+        _isLoading = false;
+      });
+
     });
   }
 
@@ -68,7 +78,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   }
 
   // メッセージ送信処理
-  void _sendMessage() {
+  void _sendMessage() async {
     final text = _controller.text;
 
     // 空白を除去して空文字の場合は送信しない
@@ -76,23 +86,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       return;
     }
 
-    // 画面を更新
-    setState(() {
-      // メッセージを追加
-      _messages.add(
-        Message(
-          senderName: "自分",
-          text: text,
-          createdAt: DateTime.now(),
-          isMine: true,
-        ),
-      );
-    });
-
     // メッセージをAPIに送信
-    _messageService.sendMessage(text).catchError((error) {
-        print("メッセージ送信エラー: $error");
-    });
+    try {
+      await _messageService.sendMessage(text);
+
+      // API送信成功後に画面を更新
+      setState(() {
+        _messages.add(
+          Message(
+            senderName: "自分",
+            text: text,
+            createdAt: DateTime.now(),
+            isMine: true,
+          ),
+        );
+      });
 
     // 入力欄をクリア
     _controller.clear();
@@ -109,6 +117,19 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
         );
       }
     });
+
+    } catch (error) {
+
+      // 画面にエラーを表示
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("メッセージの送信に失敗しました"),
+        ),
+      );
+
+      // ターミナルにもエラーを表示
+      print("メッセージ送信エラー: $error");
+    }
   }
 
   @override
@@ -125,9 +146,24 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 )
                 : _errorMessage != null
                     ? Center(
-                        child: Text(
-                            _errorMessage!,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // エラーメッセージを表示
+                          Text(_errorMessage!),
+
+                          const SizedBox(height: 16),
+
+                          // 再読み込みボタン
+                          ElevatedButton(
+                            onPressed: () {
+                              // メッセージを再取得する
+                              _loadMessages();
+                            },
+                            child: const Text("再読み込み"),
+                          ),
+                        ],
+                      ),
                     )
                     : MessageList(
                         messages: _messages,

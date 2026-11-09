@@ -25,6 +25,14 @@ public class MessageController {
     // メッセージを登録
     @PostMapping
     public Message createMessage(@RequestBody Message message) {
+
+        // 送信者名を設定
+        message.setSenderName("自分");
+
+        // 送信日時を設定
+        message.setCreatedAt(java.time.LocalDateTime.now());
+
+        // メッセージをデータベースに保存
         return messageService.saveMessage(message);
     }
 }

@@ -30,26 +30,45 @@ class MessageBubble extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            Container(
-              constraints: const BoxConstraints(maxWidth: 280),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: message.isMine ? Colors.blue : Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                message.text,
-                style: TextStyle(
-                  color: message.isMine ? Colors.white : Colors.black,
+            // 吹き出しと時刻を横並びにする
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // 自分のメッセージの場合は時刻を左側に表示
+                if (message.isMine) ...[
+                  Text(
+                    "${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}",
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+
+                // メッセージの吹き出し
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 280),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: message.isMine ? Colors.blue : Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    message.text,
+                    style: TextStyle(
+                      color: message.isMine ? Colors.white : Colors.black,
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 4),
-
-            Text(
-              "${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}",
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
+                // 相手のメッセージの場合は時刻を右側に表示
+                if (!message.isMine) ...[
+                  const SizedBox(width: 6),
+                  Text(
+                    "${message.createdAt.hour.toString().padLeft(2, '0')}:${message.createdAt.minute.toString().padLeft(2, '0')}",
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+              ],
             ),
           ],
         ),

@@ -40,8 +40,11 @@ class MessageService {
       // JSON形式でデータを送信することを指定
       headers: {"Content-Type": "application/json"},
 
-      // メッセージ本文をJSON形式に変換して送信
-      body: jsonEncode({"text": text}),
+      // メッセージ本文と送信者名をJSON形式に変換して送信
+      body: jsonEncode({
+        "text": text,
+        "senderName": "自分",
+      }),
     );
 
     // HTTPステータスが200番台以外の場合はエラーにする

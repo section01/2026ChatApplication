@@ -16,10 +16,17 @@ class Message {
   // APIから受け取ったJSONをMessageに変換する
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      senderName: "自分",
+      // APIから送信者名を取得
+      senderName: json["senderName"],
+
+      // APIからメッセージ本文を取得
       text: json["text"],
-      createdAt: DateTime.now(),
-      isMine: true,
+
+      // APIから送信日時を取得
+      createdAt: DateTime.parse(json["createdAt"]),
+
+      // 送信者名が「自分」なら自分のメッセージと判定
+      isMine: json["senderName"] == "自分",
     );
   }
 }

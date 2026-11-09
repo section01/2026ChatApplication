@@ -17,7 +17,8 @@ public class MessageService {
 
     // DBからメッセージ一覧を取得
     public List<Message> getMessages() {
-        return messageRepository.findAll();
+        // 送信日時が古い順にメッセージを取得
+        return messageRepository.findAllByOrderByCreatedAtAsc();
     }
 
     // メッセージをDBに保存
