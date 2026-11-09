@@ -6,6 +6,9 @@ import '../services/message_service.dart';
 import '../models/message.dart';
 import '../widgets/message_list.dart';
 import '../widgets/loading_indicator.dart';
+import '../models/chat_group.dart';
+import '../services/message_service.dart';
+import '../services/chat_group_service.dart';
 
 class GroupChatScreen extends StatefulWidget {
   const GroupChatScreen({super.key});
@@ -15,6 +18,7 @@ class GroupChatScreen extends StatefulWidget {
 }
 
 class _GroupChatScreenState extends State<GroupChatScreen> {
+
   late List<Message> _messages;
 
   // APIからメッセージを取得中かどうか
@@ -24,7 +28,21 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   String? _errorMessage;
 
   final MessageService _messageService = MessageService();
+
+  // グループ情報を取得するService
+  final ChatGroupService _chatGroupService = ChatGroupService();
+
+  // 取得したグループ一覧
+  List<ChatGroup> _groups = [];
+
+  // 現在選択しているグループ
+  ChatGroup? _selectedGroup;
+
   final TextEditingController _controller = TextEditingController();
+
+  // グループ名の入力欄を管理
+  final TextEditingController _groupNameController = TextEditingController();
+
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _lastMessageKey = GlobalKey();
 
@@ -36,8 +54,162 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     // 初期メッセージ
     _messages = List.from(messages);
 
-    // メッセージ一覧をAPIから取得
-    _loadMessages();
+    // グループ一覧をAPIから取得
+    _loadGroups();
+  }
+
+  // APIからグループ一覧を取得する処理
+  Future<void> _loadGroups() async {
+    try {
+      // グループ一覧をAPIから取得
+      final result = await _chatGroupService.getGroups();
+
+      // 取得したグループ一覧を画面に反映
+      setState(() {
+        _groups = result;
+
+        // グループが存在する場合は最初のグループを選択
+        if (_groups.isNotEmpty) {
+          _selectedGroup = _groups.first;
+        }
+
+        // 選択したグループのメッセージを取得
+        _loadMessages();  
+      });
+    } catch (error) {
+      // ターミナルにエラーを表示
+      print("グループ取得エラー: $error");
+    }
+  }
+
+  // グループを作成する処理
+  Future<void> _createGroup(String name) async {
+    // グループ名が空の場合は処理しない
+    if (name.trim().isEmpty) {
+      return;
+    }
+
+    try {
+      // グループ作成APIを呼び出す
+      await _chatGroupService.createGroup(name.trim());
+
+      // グループ一覧を再取得
+      await _loadGroups();
+    } catch (error) {
+      // エラーをターミナルに表示
+      print("グループ作成エラー: $error");
+    }
+  }
+
+  // グループ名を変更する処理
+  Future<void> _updateGroup(String newName) async {
+    // グループ名が空の場合は処理しない
+    if (newName.trim().isEmpty || _selectedGroup == null) {
+      return;
+    }
+
+    try {
+      // グループ名変更APIを呼び出す
+      await _chatGroupService.updateGroup(
+        _selectedGroup!.id,
+        newName.trim(),
+      );
+
+      // グループ一覧を再取得
+      await _loadGroups();
+    } catch (error) {
+      // エラーをターミナルに表示
+      print("グループ名変更エラー: $error");
+    }
+  }
+
+  // グループ作成ダイアログを表示
+  void _showCreateGroupDialog() {
+    // 入力欄を空にする
+    _groupNameController.clear();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("グループ作成"),
+          content: TextField(
+            controller: _groupNameController,
+            decoration: const InputDecoration(
+              hintText: "グループ名を入力",
+            ),
+          ),
+          actions: [
+            // キャンセルボタン
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("キャンセル"),
+            ),
+
+            // 作成ボタン
+            ElevatedButton(
+              onPressed: () async {
+                await _createGroup(_groupNameController.text);
+
+                if (!context.mounted) return;
+
+                Navigator.pop(context);
+              },
+              child: const Text("作成"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // グループ名変更ダイアログを表示
+  void _showUpdateGroupDialog() {
+    // グループが選択されていない場合は処理しない
+    if (_selectedGroup == null) {
+      return;
+    }
+
+    // 現在のグループ名を入力欄に設定
+    _groupNameController.text = _selectedGroup!.name;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("グループ名変更"),
+          content: TextField(
+            controller: _groupNameController,
+            decoration: const InputDecoration(
+              hintText: "新しいグループ名を入力",
+            ),
+          ),
+          actions: [
+            // キャンセルボタン
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("キャンセル"),
+            ),
+
+            // 変更ボタン
+            ElevatedButton(
+              onPressed: () async {
+                await _updateGroup(_groupNameController.text);
+
+                if (!context.mounted) return;
+
+                Navigator.pop(context);
+              },
+              child: const Text("変更"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // APIからメッセージ一覧を取得する処理
@@ -50,7 +222,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
     });
 
     // メッセージ一覧をAPIから取得
-    _messageService.getMessages().then((result) {
+    _messageService.getMessages(_selectedGroup!.id).then((result) {
 
       setState(() {
         _messages = result;
@@ -88,7 +260,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
     // メッセージをAPIに送信
     try {
-      await _messageService.sendMessage(text);
+      await _messageService.sendMessage(text, _selectedGroup!.id);
 
       // API送信成功後に画面を更新
       setState(() {
@@ -135,9 +307,58 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("グループチャット"), centerTitle: true),
+
+      appBar: AppBar(
+        title: const Text("グループチャット"),
+        centerTitle: true,
+
+        // グループ作成ボタンとグループ名変更ボタンをAppBarに追加
+        actions: [
+          // グループ作成ボタン
+          IconButton(
+            icon: const Icon(Icons.add),
+            tooltip: "グループ作成",
+            onPressed: () {
+              _showCreateGroupDialog();
+            },
+          ),  
+
+          // グループ名変更ボタン
+          IconButton(
+            icon: const Icon(Icons.edit),
+            tooltip: "グループ名変更",
+            onPressed: () {
+              _showUpdateGroupDialog();
+            },
+          ),
+        ],
+      ),
+
       body: Column(
         children: [
+
+          // グループ選択欄
+          DropdownButton<ChatGroup>(
+            value: _selectedGroup,
+            hint: const Text("グループを選択"),
+            items: _groups.map((group) {
+              return DropdownMenuItem<ChatGroup>(
+                value: group,
+                child: Text(group.name),
+              );
+            }).toList(),
+            onChanged: (group) {
+              // 選択したグループを更新
+              setState(() {
+                _selectedGroup = group;
+                _isLoading = true;
+              });
+
+              // 選択したグループのメッセージを取得
+              _loadMessages();
+            },
+          ),
+
           // メッセージ一覧
           Expanded(
             child: _isLoading

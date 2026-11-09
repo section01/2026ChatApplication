@@ -13,9 +13,11 @@ class MessageService {
   static const String baseUrl = "http://localhost:8080";
 
   // メッセージ一覧を取得するメソッド
-  Future<List<Message>> getMessages() async {
+  Future<List<Message>> getMessages(int groupId) async {
     // Spring Bootのメッセージ取得APIを呼び出す
-    final response = await http.get(Uri.parse("$baseUrl/api/messages"));
+    final response = await http.get(
+      Uri.parse("$baseUrl/api/messages/group/$groupId"),
+    );
 
     // HTTPステータスが200以外の場合はエラーにする
     if (response.statusCode != 200) {
@@ -32,7 +34,7 @@ class MessageService {
   }
 
   // メッセージを送信するメソッド
-  Future<void> sendMessage(String text) async {
+  Future<void> sendMessage(String text, int groupId) async {
     // Spring Bootのメッセージ登録APIを呼び出す
     final response = await http.post(
       Uri.parse("$baseUrl/api/messages"),
@@ -44,6 +46,9 @@ class MessageService {
       body: jsonEncode({
         "text": text,
         "senderName": "自分",
+        "chatGroup": {
+          "id": groupId,
+        },
       }),
     );
 

@@ -22,6 +22,12 @@ public class MessageController {
         return messageService.getMessages();
     }
 
+    // 指定したグループのメッセージを取得
+    @GetMapping("/group/{groupId}")
+    public List<Message> getMessagesByGroupId(@PathVariable Long groupId) {
+        return messageService.getMessagesByGroupId(groupId);
+    }
+
     // メッセージを登録
     @PostMapping
     public Message createMessage(@RequestBody Message message) {

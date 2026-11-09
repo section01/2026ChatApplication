@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Message {
@@ -20,6 +22,11 @@ public class Message {
 
     // メッセージの送信日時
     private LocalDateTime createdAt;
+
+    // メッセージが所属するグループ
+    @ManyToOne
+    @JoinColumn(name = "chat_group_id")
+    private ChatGroup chatGroup;
 
     public Message() {
     }
@@ -61,5 +68,15 @@ public class Message {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    // 所属するグループを取得
+    public ChatGroup getChatGroup() {
+        return chatGroup;
+    }
+
+    // 所属するグループを設定
+    public void setChatGroup(ChatGroup chatGroup) {
+        this.chatGroup = chatGroup;
     }
 }

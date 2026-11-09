@@ -1,12 +1,16 @@
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\ChatServerApplication.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\config\CorsConfig.java
+C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\controller\ChatGroupController.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\controller\HealthController.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\controller\MessageController.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\controller\TestController.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\controller\UserController.java
+C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\entity\ChatGroup.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\entity\Message.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\entity\User.java
+C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\repository\ChatGroupRepository.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\repository\MessageRepository.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\repository\UserRepository.java
+C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\service\ChatGroupService.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\service\MessageService.java
 C:\Users\yu-yoshida\Desktop\workspace\2026ChatApplication\chat-server\src\main\java\com\example\chat_server\service\UserService.java
