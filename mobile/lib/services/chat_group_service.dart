@@ -66,4 +66,17 @@ class ChatGroupService {
       throw Exception("グループ名の変更に失敗しました");
     }
   }
+
+  // グループを削除するメソッド
+  Future<void> deleteGroup(int groupId) async {
+    // グループ削除APIを呼び出す
+    final response = await http.delete(
+      Uri.parse("$baseUrl/api/groups/$groupId"),
+    );
+
+    // HTTPステータスが2xx以外の場合はエラーにする
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw Exception("グループ削除に失敗しました");
+    }
+  }
 }

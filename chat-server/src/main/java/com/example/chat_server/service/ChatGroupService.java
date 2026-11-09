@@ -39,4 +39,15 @@ public class ChatGroupService {
         // 変更したグループ情報を保存
         return chatGroupRepository.save(chatGroup);
     }
+
+    // グループを削除
+    public void deleteGroup(Long groupId) {
+
+        // 指定されたグループIDの存在を確認
+        ChatGroup chatGroup = chatGroupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("グループが見つかりません"));
+
+        // グループ情報を削除
+        chatGroupRepository.delete(chatGroup);
+    }
 }

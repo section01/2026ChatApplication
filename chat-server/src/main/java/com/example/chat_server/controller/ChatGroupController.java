@@ -41,4 +41,12 @@ public class ChatGroupController {
                 chatGroup.getName()
         );
     }
+
+    // グループを削除
+    @DeleteMapping("/{groupId}")
+    public void deleteGroup(@PathVariable Long groupId) {
+
+        // 指定されたグループを削除
+        chatGroupService.deleteGroup(groupId);
+    }
 }

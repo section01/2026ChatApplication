@@ -68,9 +68,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       setState(() {
         _groups = result;
 
-        // グループが存在する場合は最初のグループを選択
         if (_groups.isNotEmpty) {
+          // グループが存在する場合は先頭のグループを選択
           _selectedGroup = _groups.first;
+        } else {
+          // グループが存在しない場合は選択状態を解除
+          _selectedGroup = null;
         }
 
         // 選択したグループのメッセージを取得
@@ -121,6 +124,63 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
       // エラーをターミナルに表示
       print("グループ名変更エラー: $error");
     }
+  }
+
+  // グループを削除する処理
+  Future<void> _deleteGroup() async {
+    // グループが選択されていない場合は処理しない
+    if (_selectedGroup == null) {
+      return;
+    }
+
+    try {
+      // 選択中のグループを削除
+      await _chatGroupService.deleteGroup(_selectedGroup!.id);
+
+      // グループ一覧を再取得
+      await _loadGroups();
+    } catch (error) {
+      // エラーをターミナルに表示
+      print("グループ削除エラー: $error");
+    }
+  }
+
+  // グループ削除の確認ダイアログを表示
+  void _showDeleteGroupDialog() {
+    // グループが選択されていない場合は処理しない
+    if (_selectedGroup == null) {
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("グループ削除"),
+          content: Text(
+            "「${_selectedGroup!.name}」を削除しますか？",
+          ),
+          actions: [
+            // キャンセルボタン
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("キャンセル"),
+            ),
+
+            // 削除ボタン
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _deleteGroup();
+              },
+              child: const Text("削除"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // グループ作成ダイアログを表示
@@ -215,6 +275,16 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
   // APIからメッセージ一覧を取得する処理
   void _loadMessages() {
 
+    // グループが選択されていない場合
+    if (_selectedGroup == null) {
+      setState(() {
+        _messages = [];
+        _isLoading = false;
+        _errorMessage = null;
+      });
+      return;
+    }
+
     // 読み込み中の状態にする
     setState(() {
       _isLoading = true;
@@ -251,6 +321,12 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
 
   // メッセージ送信処理
   void _sendMessage() async {
+
+    // グループが選択されていない場合は送信しない
+    if (_selectedGroup == null) {
+      return;
+    }
+
     final text = _controller.text;
 
     // 空白を除去して空文字の場合は送信しない
@@ -329,6 +405,15 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
             tooltip: "グループ名変更",
             onPressed: () {
               _showUpdateGroupDialog();
+            },
+          ),
+
+          // グループ削除ボタン
+          IconButton(
+            icon: const Icon(Icons.delete),
+            tooltip: "グループ削除",
+            onPressed: () {
+              _showDeleteGroupDialog();
             },
           ),
         ],
